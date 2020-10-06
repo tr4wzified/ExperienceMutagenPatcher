@@ -2,7 +2,9 @@ using System;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -14,8 +16,14 @@ namespace ExperienceMutagenPatcher
         {
             return SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
                 args: args,
-                patcher: RunPatch
-                );
+                patcher: RunPatch,
+                new UserPreferences
+                {
+                    ActionsForEmptyArgs = new RunDefaultPatcher
+                    {
+                        TargetRelease = GameRelease.SkyrimSE
+                    }
+                }); ;
         }
 
         public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
