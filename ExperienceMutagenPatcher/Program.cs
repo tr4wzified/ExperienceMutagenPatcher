@@ -12,9 +12,10 @@ namespace ExperienceMutagenPatcher
 {
     public class Program
     {
+        private static string loadPath = "";
         public static int Main(string[] args)
         {
-            return SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
+            var done = SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
                 args: args,
                 patcher: RunPatch,
                 new UserPreferences
@@ -24,6 +25,8 @@ namespace ExperienceMutagenPatcher
                         TargetRelease = GameRelease.SkyrimSE
                     }
                 }); ;
+            File.Delete(loadPath + @"\Null");
+            return done;
         }
 
         public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
@@ -34,6 +37,7 @@ namespace ExperienceMutagenPatcher
                 float startingHealth = race.Starting.Values.ElementAt(0);
                 csv.Append(race.EditorID + "," + Math.Round(startingHealth / 10) + '\n');
             }
+            loadPath = state.Settings.DataFolderPath;
             Directory.CreateDirectory(state.Settings.DataFolderPath + @"\SKSE\Plugins\Experience\Races\");
             File.WriteAllText(state.Settings.DataFolderPath + @"\SKSE\Plugins\Experience\Races\experiencePatch.csv", csv.ToString());
         }
