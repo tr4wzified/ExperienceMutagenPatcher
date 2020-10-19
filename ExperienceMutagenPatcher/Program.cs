@@ -35,7 +35,9 @@ namespace ExperienceMutagenPatcher
             foreach (var race in state.LoadOrder.PriorityOrder.WinningOverrides<IRaceGetter>())
             {
                 float startingHealth = race.Starting.Values.ElementAt(0);
-                csv.Append(race.EditorID + "," + Math.Round(startingHealth / 10) + '\n');
+                // Not using Math.Round since the result will be different from JS Math.round
+                // Using this trick from https://stackoverflow.com/questions/1862992/how-close-is-the-javascript-math-round-to-the-c-sharp-math-round (second answer
+                csv.Append(race.EditorID + "," + Math.Floor((startingHealth / 10) + 0.5) + '\n');
             }
             loadPath = state.Settings.DataFolderPath;
             Directory.CreateDirectory(state.Settings.DataFolderPath + @"\SKSE\Plugins\Experience\Races\");
