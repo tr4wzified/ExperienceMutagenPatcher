@@ -7,29 +7,24 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ExperienceMutagenPatcher
 {
     public class Program
     {
         private static string loadPath = "";
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
-            var done = SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
-                args: args,
-                patcher: RunPatch,
-                new UserPreferences
-                {
-                    ActionsForEmptyArgs = new RunDefaultPatcher
-                    {
-                        TargetRelease = GameRelease.SkyrimSE
-                    }
-                }); ;
+            var done = await SynthesisPipeline.Instance
+                .SetTypicalOpen(GameRelease.SkyrimSE, "ExperiencePatch.esp")
+                .AddPatch<ISkyrimMod, ISkyrimModGetter>(RunPatch)
+                .Run(args);
             File.Delete(loadPath + @"\Null");
             return done;
         }
 
-        public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
+        public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             var csv = new StringBuilder();
             foreach (var race in state.LoadOrder.PriorityOrder.WinningOverrides<IRaceGetter>())
@@ -39,9 +34,9 @@ namespace ExperienceMutagenPatcher
                 // Using this trick from https://stackoverflow.com/questions/1862992/how-close-is-the-javascript-math-round-to-the-c-sharp-math-round (second answer
                 csv.Append(race.EditorID + "," + Math.Floor((startingHealth / 10) + 0.5) + '\n');
             }
-            loadPath = state.Settings.DataFolderPath;
-            Directory.CreateDirectory(state.Settings.DataFolderPath + @"\SKSE\Plugins\Experience\Races\");
-            File.WriteAllText(state.Settings.DataFolderPath + @"\SKSE\Plugins\Experience\Races\experiencePatch.csv", csv.ToString());
+            loadPath = state.DataFolderPath;
+            Directory.CreateDirectory(state.DataFolderPath + @"\SKSE\Plugins\Experience\Races\");
+            File.WriteAllText(state.DataFolderPath + @"\SKSE\Plugins\Experience\Races\experiencePatch.csv", csv.ToString());
         }
     }
 }
