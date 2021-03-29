@@ -27,7 +27,7 @@ namespace ExperienceMutagenPatcher
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             var csv = new StringBuilder();
-            foreach (var race in state.LoadOrder.PriorityOrder.WinningOverrides<IRaceGetter>())
+            foreach (var race in state.LoadOrder.PriorityOrder.Race().WinningOverrides())
             {
                 float startingHealth = race.Starting.Values.ElementAt(0);
                 // Not using Math.Round since the result will be different from JS Math.round
