@@ -15,13 +15,21 @@ namespace ExperienceMutagenPatcher
     public class Program
     {
         private static string loadPath = "";
+
+        private static readonly HashSet<ModKey> alreadyIncludedModKeys = new HashSet<ModKey>()
+        {
+            ModKey.FromNameAndExtension("Skyrim.esm"),
+            ModKey.FromNameAndExtension("Dawnguard.esm"),
+            ModKey.FromNameAndExtension("Dragonborn.esm"),
+        };
         public static async Task<int> Main(string[] args)
         {
+            var espName = "deleteThisEspIfYouSeeIt-itsEmpty.esp";
             var done = await SynthesisPipeline.Instance
-                .SetTypicalOpen(GameRelease.SkyrimSE, "ExperiencePatch.esp")
+                .SetTypicalOpen(GameRelease.SkyrimSE, espName)
                 .AddPatch<ISkyrimMod, ISkyrimModGetter>(RunPatch)
                 .Run(args);
-            File.Delete(loadPath + @"\Null");
+            File.Delete(loadPath + @$"\{espName}");
             return done;
         }
 
@@ -31,6 +39,9 @@ namespace ExperienceMutagenPatcher
             var ini = new StringBuilder();
             foreach (var raceGetter in state.LoadOrder.PriorityOrder.Race().WinningContextOverrides())
             {
+                if (alreadyIncludedModKeys.Contains(raceGetter.ModKey))
+                    continue;
+
                 var race = raceGetter.Record;
                 float startingHealth = race.Starting.Values.ElementAt(0);
                 if (!generatedData.ContainsKey(raceGetter.ModKey))
@@ -51,7 +62,7 @@ namespace ExperienceMutagenPatcher
 
             loadPath = state.DataFolderPath;
             Directory.CreateDirectory(state.DataFolderPath + @"\SKSE\Plugins\Experience\Races\");
-            File.WriteAllText(state.DataFolderPath + @"\SKSE\Plugins\Experience\Races\experiencePatch.ini", ini.ToString());
+            File.WriteAllText(state.DataFolderPath + @"\SKSE\Plugins\Experience\Races\GeneratedExperiencePatch.ini", ini.ToString());
         }
     }
 }
