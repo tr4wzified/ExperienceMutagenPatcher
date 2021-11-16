@@ -47,9 +47,13 @@ namespace ExperienceMutagenPatcher
                 if (!generatedData.ContainsKey(raceGetter.ModKey))
                     generatedData.Add(raceGetter.ModKey, new List<string>());
 
-                // Not using Math.Round since the result will be different from JS Math.round
-                // Using this trick from https://stackoverflow.com/questions/1862992/how-close-is-the-javascript-math-round-to-the-c-sharp-math-round (second answer
-                generatedData[raceGetter.ModKey].Add($"{race.EditorID}={Math.Floor((startingHealth / 10) + 0.5)}");
+                // Not using Math.Round since the result will be different from JS Math.round in the original zEdit patcher
+                // Using this trick from https://stackoverflow.com/questions/1862992/how-close-is-the-javascript-math-round-to-the-c-sharp-math-round (second answer)
+                var xp = Math.Floor((startingHealth / 10) + 0.5);
+                var sentence1 = @$";{race.EditorID} ""{race.Name}""";
+                var sentence2 = @$"00{race.FormKey.IDString()} = {xp}";
+                var sentence = sentence1 + "\n" + sentence2;
+                generatedData[raceGetter.ModKey].Add(sentence);
             }
 
             generatedData = generatedData.OrderBy(kv => kv.Key.Name).ToDictionary();
