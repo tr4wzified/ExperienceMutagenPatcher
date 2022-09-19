@@ -39,13 +39,16 @@ namespace ExperienceMutagenPatcher
             var ini = new StringBuilder();
             foreach (var raceGetter in state.LoadOrder.PriorityOrder.Race().WinningContextOverrides())
             {
-                if (alreadyIncludedModKeys.Contains(raceGetter.ModKey))
+                var race = raceGetter.Record;
+                var contexts = state.LinkCache.ResolveAllContexts<IRace, IRaceGetter>(race.FormKey).ToList();
+                var originalModKey = contexts[^1].ModKey;
+
+                if (alreadyIncludedModKeys.Contains(originalModKey))
                     continue;
 
-                var race = raceGetter.Record;
                 float startingHealth = race.Starting.Values.ElementAt(0);
-                if (!generatedData.ContainsKey(raceGetter.ModKey))
-                    generatedData.Add(raceGetter.ModKey, new List<string>());
+                if (!generatedData.ContainsKey(originalModKey))
+                    generatedData.Add(originalModKey, new List<string>());
 
                 // Not using Math.Round since the result will be different from JS Math.round in the original zEdit patcher
                 // Using this trick from https://stackoverflow.com/questions/1862992/how-close-is-the-javascript-math-round-to-the-c-sharp-math-round (second answer)
@@ -53,7 +56,7 @@ namespace ExperienceMutagenPatcher
                 var sentence1 = @$";{race.EditorID} ""{race.Name}""";
                 var sentence2 = @$"00{race.FormKey.IDString()} = {xp}";
                 var sentence = sentence1 + "\n" + sentence2;
-                generatedData[raceGetter.ModKey].Add(sentence);
+                generatedData[originalModKey].Add(sentence);
             }
 
             generatedData = generatedData.OrderBy(kv => kv.Key.Name).ToDictionary();
