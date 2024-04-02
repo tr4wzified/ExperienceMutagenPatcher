@@ -9,6 +9,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using Mutagen.Bethesda.Plugins;
+using Noggog.StructuredStrings;
 
 namespace ExperienceMutagenPatcher
 {
@@ -59,11 +60,14 @@ namespace ExperienceMutagenPatcher
                 generatedData[originalModKey].Add(sentence);
             }
 
-            generatedData = generatedData.OrderBy(kv => kv.Key.Name).ToDictionary();
-            foreach (var (modKey, linesToOutput) in generatedData)
+            //generatedData = generatedData.OrderBy(kv => kv.Key.Name).ToDictionary();
+            //foreach (var (modKey, linesToOutput) in generatedData)
+            foreach (var modKey in generatedData.Keys)
             {
                 ini.AppendLine($"[{modKey.FileName}]");
-                linesToOutput.ForEach(line => ini.AppendLine(line));
+
+                //linesToOutput.ForEach(line => ini.AppendLine(line));
+                foreach (var line in generatedData[modKey]) ini.AppendLine(line);
                 ini.AppendLine();
             }
 
