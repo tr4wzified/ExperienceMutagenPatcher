@@ -59,8 +59,8 @@ namespace ExperienceMutagenPatcher
                 generatedData[originalModKey].Add(sentence);
             }
 
-            generatedData = generatedData.OrderBy(kv => kv.Key.Name).ToDictionary();
-            foreach (var (modKey, linesToOutput) in generatedData)
+            var orderedData = generatedData.OrderBy(kv => kv.Key.Name);
+            foreach (var (modKey, linesToOutput) in orderedData)
             {
                 ini.AppendLine($"[{modKey.FileName}]");
                 linesToOutput.ForEach(line => ini.AppendLine(line));
